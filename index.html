@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>교사 도구 모음</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Malgun Gothic', '맑은 고딕', Arial, sans-serif;
+            background: #eef2f7;
+            min-height: 100vh;
+            padding: 48px 20px 60px;
+        }
+
+        .page-header {
+            max-width: 860px;
+            margin: 0 auto 40px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+        }
+        .page-title {
+            font-size: 1.9rem;
+            font-weight: 700;
+            color: #2d3748;
+            letter-spacing: 2px;
+        }
+        .page-subtitle {
+            font-size: 0.95rem;
+            color: #a0aab8;
+            margin-top: 5px;
+        }
+
+        .btn-add {
+            padding: 12px 22px;
+            background: #4a82cd;
+            color: white;
+            border: none;
+            border-radius: 11px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: inherit;
+            white-space: nowrap;
+            transition: background 0.2s, transform 0.1s;
+        }
+        .btn-add:hover  { background: #3b6fb5; }
+        .btn-add:active { transform: scale(0.96); }
+
+        .category-section {
+            max-width: 860px;
+            margin: 0 auto 36px;
+        }
+        .category-title {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #718096;
+            letter-spacing: 1px;
+            margin-bottom: 14px;
+            padding-left: 10px;
+            border-left: 3px solid #4a82cd;
+        }
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 14px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 22px 20px 18px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            transition: transform 0.15s, box-shadow 0.15s;
+        }
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(74,130,205,0.15);
+        }
+        .card-name {
+            font-size: 1.08rem;
+            font-weight: 700;
+            color: #2d3748;
+        }
+        .card-desc {
+            font-size: 0.87rem;
+            color: #718096;
+            line-height: 1.6;
+            flex: 1;
+        }
+        .card-actions {
+            display: flex;
+            gap: 7px;
+            margin-top: 6px;
+        }
+        .btn-open {
+            flex: 1;
+            padding: 9px;
+            background: #4a82cd;
+            color: white;
+            border: none;
+            border-radius: 9px;
+            font-size: 0.92rem;
+            font-weight: 700;
+            cursor: pointer;
+            text-decoration: none;
+            text-align: center;
+            font-family: inherit;
+            transition: background 0.2s;
+        }
+        .btn-open:hover { background: #3b6fb5; }
+        .btn-edit, .btn-del {
+            padding: 9px 11px;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 9px;
+            background: none;
+            font-size: 0.83rem;
+            cursor: pointer;
+            font-family: inherit;
+            transition: background 0.15s, border-color 0.15s;
+        }
+        .btn-edit { color: #718096; }
+        .btn-edit:hover { background: #f7faff; border-color: #4a82cd; color: #4a82cd; }
+        .btn-del  { color: #e05252; }
+        .btn-del:hover  { background: #fff0f0; border-color: #e05252; }
+
+        .empty-msg {
+            max-width: 860px;
+            margin: 60px auto;
+            text-align: center;
+            color: #b0bac8;
+            font-size: 1rem;
+            line-height: 1.9;
+        }
+
+        /* 모달 */
+        .overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.45);
+            z-index: 200;
+            align-items: center;
+            justify-content: center;
+        }
+        .overlay.open { display: flex; }
+        .modal {
+            background: white;
+            border-radius: 18px;
+            padding: 28px;
+            width: 430px;
+            max-width: 95vw;
+            box-shadow: 0 16px 48px rgba(0,0,0,0.22);
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .modal-header h3 { font-size: 1.2rem; color: #2d3748; }
+        .modal-close {
+            background: none; border: none; font-size: 1.3rem;
+            cursor: pointer; color: #a0aab8;
+            padding: 2px 6px; border-radius: 6px;
+        }
+        .modal-close:hover { background: #f0f0f0; color: #333; }
+
+        .field { margin-bottom: 14px; }
+        .field label {
+            display: block;
+            font-size: 0.87rem;
+            font-weight: 600;
+            color: #4a5568;
+            margin-bottom: 6px;
+        }
+        .field input, .field textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1.5px solid #dde4ef;
+            border-radius: 9px;
+            font-size: 0.95rem;
+            font-family: inherit;
+            color: #2d3748;
+            background: #fafbff;
+        }
+        .field input:focus, .field textarea:focus {
+            outline: none;
+            border-color: #4a82cd;
+            background: white;
+        }
+        .field textarea { height: 72px; resize: vertical; }
+
+        .modal-footer { display: flex; gap: 8px; margin-top: 18px; }
+        .btn {
+            padding: 11px 22px;
+            border: none;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: inherit;
+            transition: background 0.2s, transform 0.1s;
+        }
+        .btn:active { transform: scale(0.96); }
+        .btn-blue { background: #4a82cd; color: white; }
+        .btn-blue:hover { background: #3b6fb5; }
+        .btn-gray { background: #e2e8f0; color: #4a5568; }
+        .btn-gray:hover { background: #cbd5e0; }
+
+        .toast {
+            position: fixed;
+            bottom: 32px;
+            left: 50%;
+            transform: translateX(-50%) translateY(12px);
+            background: #2d3748;
+            color: #fff;
+            padding: 10px 24px;
+            border-radius: 24px;
+            font-size: 1rem;
+            opacity: 0;
+            transition: opacity 0.3s, transform 0.3s;
+            pointer-events: none;
+            z-index: 999;
+        }
+        .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    </style>
+</head>
+<body>
+
+<div class="page-header">
+    <div>
+        <div class="page-title">교사 도구 모음</div>
+        <div class="page-subtitle">자주 쓰는 프로그램을 모아두었습니다.</div>
+    </div>
+    <button class="btn-add" id="btnAdd">+ 추가</button>
+</div>
+
+<div id="mainContent"></div>
+
+<!-- 추가 / 수정 모달 -->
+<div class="overlay" id="overlay">
+    <div class="modal">
+        <div class="modal-header">
+            <h3 id="modalTitle">프로그램 추가</h3>
+            <button class="modal-close" id="btnModalClose">✕</button>
+        </div>
+        <div class="field">
+            <label>프로그램 이름 *</label>
+            <input type="text" id="inputName" placeholder="예: 자유낙하 시뮬레이션" autocomplete="off">
+        </div>
+        <div class="field">
+            <label>링크 (URL) *</label>
+            <input type="url" id="inputUrl" placeholder="https://...">
+        </div>
+        <div class="field">
+            <label>설명 (선택)</label>
+            <textarea id="inputDesc" placeholder="간단한 설명을 입력하세요."></textarea>
+        </div>
+        <div class="field">
+            <label>카테고리 (선택)</label>
+            <input type="text" id="inputCategory" placeholder="예: 과학 시뮬레이션, 학급 관리" autocomplete="off">
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-blue" id="btnSave">저장</button>
+            <button class="btn btn-gray" id="btnCancel">취소</button>
+        </div>
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const DEFAULT_PROGRAMS = [
+    { id: 1, name: '좌석 배치 (303반)', desc: '랜덤 좌석 배치, 주간 순환, 수동 교체, PDF 출력', url: 'https://jahelen-cpu.github.io/homeroom/class/303seat.html', category: '학급 관리' },
+    { id: 2, name: '에너지 시뮬레이션', desc: '에너지 관련 과학 시뮬레이션', url: 'https://jahelen-cpu.github.io/science-sim/energy.html', category: '과학 시뮬레이션' },
+    { id: 3, name: '자유낙하 시뮬레이션', desc: '자유낙하 실험 시뮬레이션', url: 'https://jahelen-cpu.github.io/science-sim/freefall.html', category: '과학 시뮬레이션' },
+    { id: 4, name: '일(work) 시뮬레이션', desc: '일의 개념 과학 시뮬레이션', url: 'https://jahelen-cpu.github.io/science-sim/work.html', category: '과학 시뮬레이션' },
+];
+
+let programs = [];
+let editingId = null;
+let nextId    = 100;
+
+function load() {
+    const saved = localStorage.getItem('teacher_programs');
+    if (saved) {
+        programs = JSON.parse(saved);
+        nextId   = Math.max(...programs.map(p => p.id), 99) + 1;
+    } else {
+        programs = DEFAULT_PROGRAMS.map(p => ({ ...p }));
+        persist();
+    }
+}
+
+function persist() {
+    localStorage.setItem('teacher_programs', JSON.stringify(programs));
+}
+
+function esc(s) {
+    return String(s)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+function render() {
+    const container = document.getElementById('mainContent');
+    if (programs.length === 0) {
+        container.innerHTML = '<div class="empty-msg">등록된 프로그램이 없습니다.<br>위의 <strong>+ 추가</strong> 버튼을 눌러 추가해보세요.</div>';
+        return;
+    }
+
+    const categories = [...new Set(programs.map(p => p.category || '기타'))];
+    container.innerHTML = categories.map(cat => {
+        const items = programs.filter(p => (p.category || '기타') === cat);
+        const cards = items.map(p => `
+            <div class="card">
+                <div class="card-name">${esc(p.name)}</div>
+                ${p.desc ? `<div class="card-desc">${esc(p.desc)}</div>` : ''}
+                <div class="card-actions">
+                    <a class="btn-open" href="${esc(p.url)}" target="_blank" rel="noopener">열기</a>
+                    <button class="btn-edit" onclick="openEdit(${p.id})">수정</button>
+                    <button class="btn-del"  onclick="deleteProgram(${p.id})">삭제</button>
+                </div>
+            </div>
+        `).join('');
+        return `
+            <div class="category-section">
+                <div class="category-title">${esc(cat)}</div>
+                <div class="cards-grid">${cards}</div>
+            </div>
+        `;
+    }).join('');
+}
+
+function openAdd() {
+    editingId = null;
+    document.getElementById('modalTitle').textContent = '프로그램 추가';
+    ['inputName', 'inputUrl', 'inputDesc', 'inputCategory'].forEach(id => {
+        document.getElementById(id).value = '';
+    });
+    document.getElementById('overlay').classList.add('open');
+    document.getElementById('inputName').focus();
+}
+
+function openEdit(id) {
+    const p = programs.find(p => p.id === id);
+    if (!p) return;
+    editingId = id;
+    document.getElementById('modalTitle').textContent = '프로그램 수정';
+    document.getElementById('inputName').value     = p.name;
+    document.getElementById('inputUrl').value      = p.url;
+    document.getElementById('inputDesc').value     = p.desc || '';
+    document.getElementById('inputCategory').value = p.category || '';
+    document.getElementById('overlay').classList.add('open');
+    document.getElementById('inputName').focus();
+}
+
+function closeModal() {
+    document.getElementById('overlay').classList.remove('open');
+}
+
+function handleSave() {
+    const name = document.getElementById('inputName').value.trim();
+    const url  = document.getElementById('inputUrl').value.trim();
+    const desc = document.getElementById('inputDesc').value.trim();
+    const cat  = document.getElementById('inputCategory').value.trim() || '기타';
+
+    if (!name) { showToast('이름을 입력해주세요.'); return; }
+    if (!url)  { showToast('링크를 입력해주세요.'); return; }
+
+    if (editingId !== null) {
+        const idx = programs.findIndex(p => p.id === editingId);
+        if (idx !== -1) programs[idx] = { id: editingId, name, url, desc, category: cat };
+        showToast('수정되었습니다.');
+    } else {
+        programs.push({ id: nextId++, name, url, desc, category: cat });
+        showToast('추가되었습니다.');
+    }
+
+    persist();
+    render();
+    closeModal();
+}
+
+function deleteProgram(id) {
+    if (!confirm('이 프로그램을 목록에서 삭제할까요?')) return;
+    programs = programs.filter(p => p.id !== id);
+    persist();
+    render();
+    showToast('삭제되었습니다.');
+}
+
+let toastTimer = null;
+function showToast(msg) {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.classList.add('show');
+    if (toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => el.classList.remove('show'), 2200);
+}
+
+document.getElementById('btnAdd').addEventListener('click', openAdd);
+document.getElementById('btnSave').addEventListener('click', handleSave);
+document.getElementById('btnCancel').addEventListener('click', closeModal);
+document.getElementById('btnModalClose').addEventListener('click', closeModal);
+document.getElementById('overlay').addEventListener('click', e => {
+    if (e.target === e.currentTarget) closeModal();
+});
+document.getElementById('inputCategory').addEventListener('keydown', e => {
+    if (e.key === 'Enter') handleSave();
+});
+
+load();
+render();
+</script>
+</body>
+</html>
