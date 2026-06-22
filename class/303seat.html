@@ -1175,7 +1175,7 @@ function buildPrintHTML(isTeacher) {
     const boardBottom = '<div class="board-label" style="font-size:1.3rem;font-weight:700;color:#2d3748;letter-spacing:4px;margin-top:16px;">칠판</div>';
     const grid = `<div class="grid">${gridInner}</div>`;
     const body = isTeacher
-        ? `${grid}${boardBottom}`
+        ? `<h1>교사용 좌석 배치</h1>${grid}${boardBottom}`
         : `<h1>학생 좌석 배치</h1>${boardTop}${grid}`;
 
     return `<!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8">
