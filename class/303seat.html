@@ -612,7 +612,7 @@ function init() {
     layout = l ? JSON.parse(l) : DEFAULT_LAYOUT.map(c => [...c]);
 
     const a = localStorage.getItem('cls_avoid');
-    avoidPairs = a ? JSON.parse(a) : [{ name1: '임지완', name2: '최건' }];
+    avoidPairs = a ? JSON.parse(a) : [];
 
     renderGrid();
     bindEvents();
